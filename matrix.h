@@ -5,38 +5,42 @@
 template <typename T>
 class Matrix
 {
-    Matrix () = delete;
+    Matrix() = delete;
     public:
-    Matrix (int rows, int cols) : rows(rows), cols(cols)
+    Matrix(int rows, int cols) : rows(rows), cols(cols)
     {
-        pointer = new T*[rows];
+        pointer = new T * [rows];
         for (int i = 0; i != cols; ++i)
         {
             pointer[i] = new T[cols];
-            for (int j = 0; j != rows; ++j){
-                pointer[i][j]={};
+            for (int j = 0; j != rows; ++j) 
+            {
+                pointer[i][j] = {};
             }
         }
     }
-    Matrix (const Matrix& other) {
-        if (this != &other) 
+    Matrix(const Matrix& other) 
+    {
+        if (this != &other)
         {
-            for (int i=0;i<rows;i++) {
-                for (int j=0;j<cols;j++){
-                    this->pointer[i][j]=other.pointer[i][j];
+            for (int i = 0; i < rows; i++) 
+            {
+                for (int j = 0; j < cols; j++) 
+                {
+                    this -> pointer[i][j] = other.pointer[i][j];
                 }
             }
         }
     }
-    ~Matrix () {
+    ~Matrix() {
         for (int i = 0; i != rows; ++i)
         {
-            delete [] pointer[i];
+            delete[] pointer[i];
         }
-        delete [] pointer;
+        delete[] pointer;
     }
 
-    void fill_matrix ()
+    void fill_matrix()
     {
         for (int i = 0; i < rows; i++)
         {
@@ -49,7 +53,7 @@ class Matrix
 
     void print_matrix() 
     {
-        for (int i = 0; i < rows; i++) 
+        for (int i = 0; i < rows; i++)
         {
             for (int j = 0; j < cols; j++)
             {
@@ -72,7 +76,7 @@ class Matrix
         return sum;
     }
 
-    Matrix operator - (const Matrix& other) 
+    Matrix operator - (const Matrix& other)
     {
         Matrix dif (rows, cols);
         for (unsigned i = 0; i < rows; i++)
@@ -87,83 +91,83 @@ class Matrix
 
     Matrix& operator=(const Matrix& other)
     {
-        if (this != &other) 
+        if (this != &other)
         {
-           Matrix tmp(other);
-           std::swap(*this, tmp);
+            Matrix tmp(other);
+            std::swap(*this, tmp);
         }
         return *this;
     }
 
-    Matrix& operator=(Matrix&& other)
+    Matrix& operator=(Matrix&& other) noexcept 
     {
-        std::swap(*this, other);
+        std::swap(this -> pointer, other.pointer);
+        this -> cols = other.cols;
+        this -> rows = other.rows;
         return *this;
     }
 
-    int determinant (int size)
+    int determinant(int size)
     {
-    if(rows!=cols)
-        throw std::invalid_argument("Matrix is not square");
-    int result = 0;
-    if (size == 1) 
-    {
-         return pointer [0][0];
-    }
-    
-    else if (size == 2) 
-    {
-        return (pointer [0][0] * pointer [1][1]) - (pointer [0][1] * pointer [1][0]);
-    }
- 
-    else 
-    {
-        int sign = 1;
-        for (int i = 0; i < size; i++) 
+        if (rows != cols)
+            throw std::invalid_argument("Matrix is not square");
+        int result = 0;
+        if (size == 1)
         {
-            Matrix submatrix (size - 1, size - 1);
-            int subm_i = 0, subm_j = 0;
-            for (int j = 1; j < size; j++) 
+            return pointer[0][0];
+        }
+
+        else if (size == 2)
+        {
+            return (pointer[0][0] * pointer[1][1]) - (pointer[0][1] * pointer[1][0]);
+        }
+
+        else
+        {
+            int sign = 1;
+            for (int i = 0; i < size; i++)
             {
-                for (int k = 0; k < size; k++) 
+                Matrix submatrix(size - 1, size - 1);
+                int subm_i = 0, subm_j = 0;
+                for (int j = 1; j < size; j++)
                 {
-                    if (k == i) 
+                    for (int k = 0; k < size; k++)
                     {
-                        continue;
+                        if (k == i)
+                        {
+                            continue;
+                        }
+                        submatrix.pointer[subm_i][subm_j] = pointer[j][k];
+                        subm_j++;
                     }
-                    submatrix.pointer [subm_i][subm_j] = pointer [j][k];
-                    subm_j++;
+                    subm_i++;
+                    subm_j = 0;
                 }
-                subm_i++;
-                subm_j = 0;
+
+                result += sign * pointer[0][i] * submatrix.determinant(size - 1);
+                sign *= (-1);
+                return result; 
             }
-			
-            result += sign * pointer [0][i] * submatrix.determinant(size - 1);
-            sign *= (-1);
-            return result;
         }
     }
-}
 
-void transpose () 
-{
-    Matrix tr_m (cols, rows);
-    for (unsigned j = 0; j < rows; j++)
+    void transpose()
     {
-        for (unsigned q = 0; q < cols; q++)
+        Matrix tr_m(cols, rows);
+        for (int j = 0; j < rows; j++)
         {
-            tr_m.pointer[q][j] = pointer[j][q];
+            for (int q = 0; q < cols; q++)
+            {
+                tr_m.pointer[q][j] = pointer[j][q];
+            }
         }
+        std::swap(rows, cols);
+        *this = std::move(tr_m); 
     }
-    std::swap(rows,cols);
-    std::move(tr_m);
-}
 
 
-    private:
+private:
     T** pointer;
     int rows;
     int cols;
 };
-
-
