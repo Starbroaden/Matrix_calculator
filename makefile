@@ -1,4 +1,4 @@
-TARGET = Project
+TARGET = LETSGO
 CC = g++
 
 PREF_SRC = ./src/
